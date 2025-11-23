@@ -1,253 +1,265 @@
-import axios from "@/services/api.customize";
-export const loginAPI = (email: string, password: string) => {
-  const url = `/auth/login`;
-  return axios.post<ILogin>(url, { email, password });
-};
-export const fetchAccountAPI = () => {
-  const url = `/profile`;
-  return axios.get<IFetchUser>(url);
-};
-export const getAllSongs = (genreId?: string, artistId?: string) => {
-  const params: any = {};
-  if (genreId) params.genreId = genreId;
-  if (artistId) params.artistId = artistId;
+import axios from "axios";
+import api, {
+  apisAttempt,
+  apisAuth,
+  apisExam,
+  apisSpeaking,
+  apisVocabulary,
+  apisWriting,
+} from "./api.customize";
 
-  return axios.get("/songs", { params });
-};
+export async function addExam(
+  title: string,
+  slug: string,
+  descriptionMd: string,
+  category: string,
+  level: string,
+  durationMin: number
+) {
+  const res = await apisExam.post("/admin/exam/addexam", {
+    title,
+    slug,
+    descriptionMd,
+    category,
+    level,
+    durationMin,
+  });
 
-export const logoutAPI = () => {
-  const urlBackend = `/logout`;
-  return axios.post<{ message: string }>(urlBackend);
-};
-export const createUserAPI = (
-  email: string,
-  password: string,
-  name: string
-) => {
-  const url = `/auth/signup`;
-  return axios.post<IRegister>(url, { email, password, name });
-};
-export const updateUserAPI = (
+  return res;
+}
+
+export async function updateExam(
   id: string,
-  email: string,
-  displayName: string
-) => {
-  const url = `/users/${id}`;
-  return axios.patch<IRegister>(url, { email, displayName });
-};
-export const deleteUserAPI = (id: string) => {
-  const url = `/users/${id}`;
-  return axios.delete<IRegister>(url);
-};
-export const getAllUsersAPI = (params: Record<string, any>) => {
-  return axios.get("/users", { params });
-};
-
-export const deleteSongAPI = (id: string) => {
-  const url = `/songs/${id}`;
-  return axios.delete(url);
-};
-export const getCategories = () => {
-  const url = `/users`;
-  return axios.get<IPaginatedSongs>(url);
-};
-
-export const createSongAPI = (formData: FormData) => {
-  return axios.post("/songs", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
-
-export const assignArtistToSong = (songId: string, artistId: string) => {
-  return axios.get(`/songs/artists/${songId}`, {
-    params: { artistId },
-  });
-};
-export const createArtistAPI = (payload: ICreateArtistPayload) => {
-  const formData = new FormData();
-  formData.append("name", payload.name);
-  formData.append("image", payload.image); // dạng File
-  payload.songIds.forEach((id) => formData.append("songIds", id));
-
-  return axios.post("/artists", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
-
-export const getAllArtistsAPI = (page: number) => {
-  return axios.get("/artists", {
-    params: { page },
-  });
-};
-
-export const createGenreAPI = (payload: { name: string }) => {
-  return axios.post("/genres", payload);
-};
-
-export const getAllGenresAPI = () => {
-  return axios.get("/genres");
-};
-export const updateSongAPI = (id: string, formData: FormData) => {
-  const url = `/songs/${id}`;
-  return axios.patch(url, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
-
-export const updateArtistAPI = (
-  id: string,
-  name: string,
-  imageUrl: string,
-  songIds: string[]
-) => {
-  const url = `/artists/${id}`;
-  return axios.patch(url, {
-    name,
-    imageUrl,
-    songIds,
-  });
-};
-export const deleteArtistAPI = (id: string) => {
-  return axios.delete(`/artists/${id}`);
-};
-export const updateGenreAPI = (id: string, name: string, songIds: string[]) => {
-  return axios.patch(`/genres/${id}`, {
-    name,
-    songIds,
-  });
-};
-
-export const deleteGenreAPI = (id: string) => {
-  return axios.delete(`/genres/${id}`);
-};
-export const createKaraokeAPI = (formData: FormData) => {
-  return axios.post("/karaokes", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
-export const getAllKaraokesAPI = () => {
-  return axios.get("/karaokes");
-};
-export const updateKaraokeAPI = (
-  id: string,
-  description: string,
-  videoUrl: string,
-  songId: string,
+  title: string,
+  descriptionMd: string,
+  category: string,
+  level: string,
+  durationMin: number,
   status: string
-) => {
-  return axios.patch(`/karaokes/${id}`, {
-    description,
-    videoUrl,
-    songId,
+) {
+  const res = await apisExam.put(`/admin/exam/update/${id}`, {
+    title,
+    descriptionMd,
+    category,
+    level,
+    durationMin,
     status,
   });
-};
-export const deleteKaraokeAPI = (id: string) => {
-  return axios.delete(`/karaokes/${id}`);
-};
-export const createPlaylistAPI = (
-  title: string,
-  image: File,
-  description: string,
-  isPublic: boolean,
-  userId: string,
-  songIds: string[]
-) => {
-  const formData = new FormData();
-  formData.append("title", title);
-  formData.append("image", image);
-  formData.append("description", description);
-  formData.append("isPublic", String(isPublic));
-  formData.append("userId", userId);
-  songIds.forEach((id) => formData.append("songIds[]", id));
 
-  return axios.post("/playlists", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
+  return res;
+}
+
+export async function deleteExam(id: string) {
+  const res = await apisExam.delete(`/admin/exam/delete/${id}`);
+  return res;
+}
+export async function addOption(
+  questionId: string,
+  idx: number,
+  contentMd: string,
+  isCorrect: boolean
+) {
+  const res = await apisExam.post("/admin/option/add", {
+    questionId,
+    idx,
+    contentMd,
+    isCorrect,
+  });
+
+  return res;
+}
+export async function updateOption(
+  id: string,
+  questionId: string,
+  idx: number,
+  contentMd: string,
+  isCorrect: boolean
+) {
+  const res = await apisExam.put(`/admin/option/update/${id}`, {
+    questionId,
+    idx,
+    contentMd,
+    isCorrect,
+  });
+
+  return res;
+}
+export async function deleteOption(id: string) {
+  const res = await apisExam.delete(`/admin/option/delete/${id}`);
+  return res;
+}
+export async function addQuestion(
+  sectionId: string,
+  idx: number,
+  type: string,
+  skill: string,
+  difficulty: number,
+  promptMd: string,
+  explanationMd: string,
+  blankAcceptTexts: Record<string, string[]>,
+  blankAcceptRegex: Record<string, string[]>,
+  matchPairs: Record<string, string[]>,
+  orderCorrects: string[],
+  shortAnswerAcceptTexts: string[],
+  shortAnswerAcceptRegex: string[]
+) {
+  const res = await apisExam.post("/admin/question/add", {
+    sectionId,
+    idx,
+    type,
+    skill,
+    difficulty,
+    promptMd,
+    explanationMd,
+    blankAcceptTexts,
+    blankAcceptRegex,
+    matchPairs,
+    orderCorrects,
+    shortAnswerAcceptTexts,
+    shortAnswerAcceptRegex,
+  });
+
+  return res;
+}
+
+export async function updateQuestion(
+  id: string,
+  sectionId: string,
+  idx: number,
+  type: string,
+  skill: string,
+  difficulty: number,
+  promptMd: string,
+  explanationMd: string,
+  blankAcceptTexts: Record<string, string[]>,
+  blankAcceptRegex: Record<string, string[]>,
+  matchPairs: Record<string, string[]>,
+  orderCorrects: string[],
+  shortAnswerAcceptTexts: string[],
+  shortAnswerAcceptRegex: string[]
+) {
+  const res = await apisExam.put(`/admin/question/update/${id}`, {
+    sectionId,
+    idx,
+    type,
+    skill,
+    difficulty,
+    promptMd,
+    explanationMd,
+    blankAcceptTexts,
+    blankAcceptRegex,
+    matchPairs,
+    orderCorrects,
+    shortAnswerAcceptTexts,
+    shortAnswerAcceptRegex,
+  });
+
+  return res;
+}
+
+export async function deleteQuestion(id: string) {
+  const res = await apisExam.delete(`/admin/question/delete/${id}`);
+  return res;
+}
+export async function addSection(
+  examId: string,
+  idx: number,
+  title: string,
+  instructionsMd: string,
+  audioUrl: string,
+  transcriptMd: string
+) {
+  const res = await apisExam.post("/admin/section/add", {
+    examId,
+    idx,
+    title,
+    instructionsMd,
+    audioUrl,
+    transcriptMd,
+  });
+
+  return res;
+}
+export async function updateSection(
+  id: string,
+  examId: string,
+  idx: number,
+  title: string,
+  instructionsMd: string,
+  audioUrl: string,
+  transcriptMd: string
+) {
+  const res = await apisExam.put(`/admin/section/update/${id}`, {
+    examId,
+    idx,
+    title,
+    instructionsMd,
+    audioUrl,
+    transcriptMd,
+  });
+
+  return res;
+}
+export async function deleteSection(id: string) {
+  const res = await apisExam.delete(`/admin/section/delete/${id}`);
+  return res;
+}
+
+export async function getAllPublicExams(
+  page: number,
+  pageSize: number,
+  opts?: {
+    category?: string;
+    level?: string;
+  }
+) {
+  const res = await apisExam.get("/api/public/exam/getall", {
+    params: {
+      page,
+      pageSize,
+      category: opts?.category,
+      level: opts?.level,
     },
   });
-};
 
-export const getAllPlaylistsAPI = () => {
-  return axios.get(`/playlists`);
-};
-export const deletePlaylistAPI = (id: string) => {
-  return axios.delete(`/playlists/${id}`);
-};
-export const updatePlaylistAPI = (
+  return res;
+}
+export async function createSpeakingExam(
+  title: string,
+  taskText: string,
+  examType: number,
+  level: string,
+  tag: string
+) {
+  const res = await apisSpeaking.post("/admin/speaking/create", {
+    title,
+    taskText,
+    examType,
+    level,
+    tag,
+  });
+
+  return res;
+}
+export async function updateSpeakingExam(
   id: string,
   title: string,
-  imageUrl: string,
-  description: string,
-  isPublic: boolean,
-  songIds: string[]
-) => {
-  return axios.patch(`/playlists/${id}`, {
+  taskText: string,
+  examType: number,
+  level: string,
+  tag: string
+) {
+  const res = await apisSpeaking.put(`/admin/speaking/update/${id}`, {
     title,
-    imageUrl,
-    description,
-    isPublic,
-    songIds,
+    taskText,
+    examType,
+    level,
+    tag,
   });
-};
-export const searchSongsByTitleAPI = (q: string) => {
-  return axios.get("/songs/search/title", {
-    params: { q },
-  });
-};
-export const searchSongsByArtistAPI = (q: string) => {
-  return axios.get("/songs/search/artist", {
-    params: { q },
-  });
-};
-export const searchPlaylistsByTitleAPI = (searchTitle: string) => {
-  return axios.get(`/playlists/${searchTitle}`);
-};
-export const getSongsInPlaylistAPI = (playlistId: string) => {
-  return axios.get(`/playlists/${playlistId}/songs`);
-};
-const updatePlaylistSongsIndividually = async (
-  playlistId: string,
-  songIds: string[]
-) => {
-  for (const songId of songIds) {
-    try {
-      await axios.patch(`/playlists/${playlistId}/songs/${songId}`);
-    } catch (err) {
-      console.error(`Lỗi khi cập nhật bài hát ${songId}:`, err);
-    }
-  }
-};
-export const sendNotificationToAllUserAPI = async (data: {
-  title: string;
-  description: string;
-}) => {
-  const res = await axios.post(
-    "/notifications/sendNotificationToAllUser",
-    data
-  );
-  return res;
-};
 
-export const sendNotificationToUserAPI = async (data: {
-  title: string;
-  description: string;
-  userId: string;
-}) => {
-  const res = await axios.post("/notifications/sendNotificationToUser", data);
-  return res.data;
-};
-export const getExpoPushTokensByUserIdAPI = async (
-  userId: string
-): Promise<string[]> => {
-  const res = await axios.get(`/users/userTokenList/${userId}`);
   return res;
-};
+}
+export async function deleteSpeakingExam(id: string) {
+  const res = await apisSpeaking.delete(`/admin/speaking/delete/${id}`);
+  return res;
+}
