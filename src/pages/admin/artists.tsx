@@ -1,7 +1,7 @@
-import TableArtists from "@/components/admin/artists/table.artists";
+import TableWriting from "@/components/admin/artists/table.writing";
 
-const Artists = () => {
-  return <TableArtists />;
+const Writing = () => {
+  return <TableWriting />;
 };
 
-export default Artists;
+export default Writing;

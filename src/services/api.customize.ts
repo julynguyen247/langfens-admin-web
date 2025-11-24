@@ -6,9 +6,11 @@ type ServiceKey =
   | "attempt"
   | "vocabulary"
   | "speaking"
-  | "writing"; // ✅ đã thêm writing
+  | "writing";
 
-const GATEWAY_BASE = process.env.NEXT_PUBLIC_GATEWAY_URL || "";
+const GATEWAY_BASE = import.meta.env.VITE_GATEWAY_URL || "";
+
+// Build Gateway prefix
 const buildBase = (suffix: string) =>
   GATEWAY_BASE ? `${GATEWAY_BASE}${suffix}` : suffix;
 
@@ -21,6 +23,7 @@ const BASE_URL: Record<ServiceKey, string> = {
   writing: buildBase("/api-writing"),
 };
 
+// Token helpers
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
@@ -30,6 +33,7 @@ const setToken = (t: string | null) => {
   else localStorage.removeItem("access_token");
 };
 
+// Build axios instances
 const apis = Object.fromEntries(
   (Object.keys(BASE_URL) as (keyof typeof BASE_URL)[]).map((k) => {
     const api = axios.create({
@@ -48,7 +52,7 @@ const apis = Object.fromEntries(
       return config;
     });
 
-    // Auto refresh token
+    // Auto-refresh token
     api.interceptors.response.use(
       (res) => res,
       async (err: AxiosError) => {
@@ -62,6 +66,7 @@ const apis = Object.fromEntries(
             const r = await apisAuth.post("/auth/refresh", undefined, {
               withCredentials: true,
             });
+
             const newToken = (r.data as any)?.accessToken ?? null;
 
             if (newToken) {
@@ -84,7 +89,6 @@ const apis = Object.fromEntries(
   })
 ) as Record<ServiceKey, AxiosInstance>;
 
-// Exports
 export const apisAuth = apis.auth;
 export const apisExam = apis.exam;
 export const apisAttempt = apis.attempt;

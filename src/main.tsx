@@ -9,12 +9,13 @@ import "@ant-design/v5-patch-for-react-19";
 import enUS from "antd/es/locale/en_US";
 import { AppProvider } from "./components/context/app.context";
 import LoginPage from "./pages/admin/login";
-import Songs from "./pages/admin/songs";
+import Speaking from "./pages/admin/speaking";
 import Artists from "./pages/admin/artists";
 import Genres from "./pages/admin/genres";
 import Karaoke from "./pages/admin/karaoke";
-import Playlists from "./pages/admin/playlists";
+import Exams from "./pages/admin/exams";
 import Notifications from "./pages/admin/notifications";
+import Writing from "./pages/admin/artists";
 
 const router = createBrowserRouter([
   {
@@ -34,12 +35,12 @@ const router = createBrowserRouter([
         element: <Users />,
       },
       {
-        path: "songs",
-        element: <Songs />,
+        path: "speaking",
+        element: <Speaking />,
       },
       {
-        path: "artists",
-        element: <Artists />,
+        path: "writing",
+        element: <Writing />,
       },
       {
         path: "genres",
@@ -50,8 +51,8 @@ const router = createBrowserRouter([
         element: <Karaoke />,
       },
       {
-        path: "playlists",
-        element: <Playlists />,
+        path: "exams",
+        element: <Exams />,
       },
       {
         path: "notifications",

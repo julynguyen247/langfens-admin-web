@@ -263,3 +263,56 @@ export async function deleteSpeakingExam(id: string) {
   const res = await apisSpeaking.delete(`/admin/speaking/delete/${id}`);
   return res;
 }
+export async function getSpeakingExams() {
+  const res = await apisSpeaking.get("/speaking/exams");
+  return res;
+}
+export async function getWritingExams() {
+  const res = await apisWriting.get("/writing/exams");
+  return res;
+}
+export async function getAllAdminExams() {
+  const res = await apisExam.get("/admin/exam/all");
+  return res;
+}
+export async function createWritingExam(
+  title: string,
+  taskText: string,
+  examType: number,
+  level: string,
+  tag: string
+) {
+  const res = await apisWriting.post("/admin/writing/create", {
+    title,
+    taskText,
+    examType,
+    level,
+    tag,
+  });
+
+  return res;
+}
+export async function updateWritingExam(
+  id: string,
+  title: string,
+  taskText: string,
+  examType: number,
+  level: string,
+  tag: string
+) {
+  const res = await apisWriting.put(`/admin/writing/update/${id}`, {
+    title,
+    taskText,
+    examType,
+    level,
+    tag,
+  });
+
+  return res;
+}
+
+// DELETE writing exam
+export async function deleteWritingExam(id: string) {
+  const res = await apisWriting.delete(`/admin/writing/delete/${id}`);
+  return res;
+}
