@@ -2,33 +2,33 @@ import React, { useEffect } from "react";
 import {
   DashboardOutlined,
   UserOutlined,
-  DownOutlined,
   LogoutOutlined,
+  ReadOutlined,
+  BookOutlined,
+  DatabaseOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Layout, Menu, Space, message } from "antd";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
-import { CiMusicNote1, CiMicrophoneOn } from "react-icons/ci";
-import { FaUserEdit } from "react-icons/fa";
-import { BiCategory } from "react-icons/bi";
-import { PiPlaylistThin } from "react-icons/pi";
-import { IoIosNotifications } from "react-icons/io";
 import { useCurrentApp } from "../context/app.context";
 
 const AdminLayout: React.FC = () => {
   const { Header, Sider, Content } = Layout;
   const navigate = useNavigate();
+  const location = useLocation();
+
   const { isLoading, isAuthenticated, setIsAuthenticated } = useCurrentApp();
-  useEffect(() => {
-    console.log(isAuthenticated);
-  }, []);
+
+  // 🔐 Logout
   const handleLogout = async () => {
     setIsAuthenticated(false);
     localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
     message.success("Đã đăng xuất thành công!");
     navigate("/login");
   };
 
+  // 🔒 Protect admin
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       message.warning("Vui lòng đăng nhập để tiếp tục!");
@@ -52,59 +52,57 @@ const AdminLayout: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
+      {/* ========== SIDEBAR ========== */}
       <Sider collapsible>
-        <div className="text-white text-2xl font-bold text-center my-6">
-          Admin Panel
+        <div className="text-white text-xl font-bold text-center my-6">
+          Langfens Admin
         </div>
+
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["1"]}
+          selectedKeys={[location.pathname]}
           items={[
             {
-              key: "1",
+              key: "/",
               icon: <DashboardOutlined />,
               label: <Link to="/">Dashboard</Link>,
             },
             {
-              key: "2",
+              key: "/users",
               icon: <UserOutlined />,
               label: <Link to="/users">Users</Link>,
             },
             {
-              key: "3",
-              icon: <CiMusicNote1 />,
-              label: <Link to="/songs">Songs</Link>,
+              key: "/exams",
+              icon: <ReadOutlined />,
+              label: <Link to="/exams">Exams</Link>,
             },
             {
-              key: "4",
-              icon: <FaUserEdit />,
-              label: <Link to="/artists">Artists</Link>,
+              key: "/speaking",
+              icon: <ReadOutlined />,
+              label: <Link to="/speaking">Speaking</Link>,
             },
             {
-              key: "5",
-              icon: <BiCategory />,
-              label: <Link to="/genres">Genres</Link>,
+              key: "/writing",
+              icon: <ReadOutlined />,
+              label: <Link to="/writing">Writing</Link>,
             },
             {
-              key: "6",
-              icon: <CiMicrophoneOn />,
-              label: <Link to="/karaokes">Karaokes</Link>,
+              key: "/decks",
+              icon: <BookOutlined />,
+              label: <Link to="/decks">Vocabulary Decks</Link>,
             },
             {
-              key: "7",
-              icon: <PiPlaylistThin />,
-              label: <Link to="/playlists">Playlists</Link>,
-            },
-            {
-              key: "8",
-              icon: <IoIosNotifications />,
-              label: <Link to="/notifications">Notifications</Link>,
+              key: "/dictionary",
+              icon: <DatabaseOutlined />,
+              label: <Link to="/dictionary">Dictionary</Link>,
             },
           ]}
         />
       </Sider>
 
+      {/* ========== MAIN ========== */}
       <Layout>
         <Header
           style={{
@@ -113,33 +111,25 @@ const AdminLayout: React.FC = () => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            height: "64px",
+            height: 64,
             boxShadow: "0 2px 8px #f0f1f2",
           }}
         >
-          <div className="text-xl font-semibold text-gray-800">
-            Trang Quản Lý
+          <div className="text-lg font-semibold text-gray-800">
+            Admin Management
           </div>
 
-          {isLoading ? null : isAuthenticated ? (
+          {!isLoading && isAuthenticated && (
             <Dropdown menu={userMenu}>
               <Space className="cursor-pointer">
-                <FaUserCircle size={24} />
+                <FaUserCircle size={22} />
                 <span className="text-gray-700 font-medium">Admin</span>
-                <DownOutlined />
               </Space>
             </Dropdown>
-          ) : (
-            <Link
-              to="/login"
-              className="text-blue-600 font-medium hover:underline"
-            >
-              Đăng nhập
-            </Link>
           )}
         </Header>
 
-        <Content style={{ margin: "16px" }}>
+        <Content style={{ margin: 16 }}>
           <div
             style={{
               padding: 24,

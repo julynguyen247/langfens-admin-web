@@ -5,13 +5,13 @@ import { createWritingExam } from "@/services/api";
 
 interface IProps {
   openModalCreate: boolean;
-  setOpenModalCreate: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenModalCreate: (v: boolean) => void;
   refreshTable: () => void;
 }
 
 type FieldType = {
   title: string;
-  promptMd: string;
+  taskText: string;
   examType: number;
   level: string;
   tag: string;
@@ -26,10 +26,9 @@ const CreateWriting = (props: IProps) => {
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     setIsSubmit(true);
     try {
-      // ✅ Gọi API theo dạng payload object
       const res = await createWritingExam(
         values.title,
-        values.promptMd,
+        values.taskText,
         values.examType,
         values.level,
         values.tag
@@ -46,7 +45,7 @@ const CreateWriting = (props: IProps) => {
           description: "Không nhận được phản hồi hợp lệ",
         });
       }
-    } catch (error) {
+    } catch {
       notification.error({
         message: "Tạo thất bại",
         description: "Lỗi trong quá trình gửi dữ liệu",
@@ -57,7 +56,7 @@ const CreateWriting = (props: IProps) => {
 
   return (
     <Modal
-      title="Thêm đề Writing mới"
+      title="Thêm mới đề Writing"
       open={openModalCreate}
       onOk={() => form.submit()}
       onCancel={() => {
@@ -70,36 +69,21 @@ const CreateWriting = (props: IProps) => {
       width={600}
     >
       <Divider />
-      <Form<FieldType>
-        form={form}
-        name="create-writing-exam"
-        onFinish={onFinish}
-        autoComplete="off"
-        layout="vertical"
-      >
-        <Form.Item<FieldType>
-          label="Tiêu đề"
-          name="title"
-          rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
-        >
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form.Item label="Tiêu đề" name="title" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item<FieldType>
-          label="Prompt / Đề bài (Markdown)"
-          name="promptMd"
-          rules={[{ required: true, message: "Vui lòng nhập đề bài" }]}
+        <Form.Item
+          label="Đề bài Writing"
+          name="taskText"
+          rules={[{ required: true }]}
         >
           <Input.TextArea rows={4} />
         </Form.Item>
 
-        <Form.Item<FieldType>
-          label="Loại đề (examType)"
-          name="examType"
-          rules={[{ required: true, message: "Vui lòng chọn loại đề" }]}
-        >
+        <Form.Item label="Loại đề" name="examType" rules={[{ required: true }]}>
           <Select
-            placeholder="Chọn loại đề"
             options={[
               { label: "Task 1", value: 1 },
               { label: "Task 2", value: 2 },
@@ -107,13 +91,8 @@ const CreateWriting = (props: IProps) => {
           />
         </Form.Item>
 
-        <Form.Item<FieldType>
-          label="Level"
-          name="level"
-          rules={[{ required: true, message: "Vui lòng chọn level" }]}
-        >
+        <Form.Item label="Level" name="level" rules={[{ required: true }]}>
           <Select
-            placeholder="Chọn level"
             options={[
               { label: "Beginner", value: "beginner" },
               { label: "Intermediate", value: "intermediate" },
@@ -122,12 +101,8 @@ const CreateWriting = (props: IProps) => {
           />
         </Form.Item>
 
-        <Form.Item<FieldType>
-          label="Tag"
-          name="tag"
-          rules={[{ required: true, message: "Vui lòng nhập tag" }]}
-        >
-          <Input placeholder="Ví dụ: IELTS, TOEIC, Task 1, Essay, ..." />
+        <Form.Item label="Tag" name="tag" rules={[{ required: true }]}>
+          <Input />
         </Form.Item>
       </Form>
     </Modal>

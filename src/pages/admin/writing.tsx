@@ -1,4 +1,5 @@
-import TableWriting from "@/components/admin/artists/table.writing";
+import TableWriting from "@/components/admin/writing/table.writing";
+
 
 const Writing = () => {
   return <TableWriting />;

@@ -3,19 +3,24 @@ import "./styles/global.css";
 import ReactDOM from "react-dom/client";
 import { App, ConfigProvider } from "antd";
 import AdminLayout from "./components/layout/layout.admin";
-import Dashboard from "./pages/admin/dashboard";
+
 import Users from "./pages/admin/users";
+import LoginPage from "./pages/admin/login";
+import Speaking from "./pages/admin/speaking";
+import Writing from "./pages/admin/writing";
+import Exams from "./pages/admin/exams";
+
 import "@ant-design/v5-patch-for-react-19";
 import enUS from "antd/es/locale/en_US";
 import { AppProvider } from "./components/context/app.context";
-import LoginPage from "./pages/admin/login";
-import Speaking from "./pages/admin/speaking";
-import Artists from "./pages/admin/artists";
-import Genres from "./pages/admin/genres";
-import Karaoke from "./pages/admin/karaoke";
-import Exams from "./pages/admin/exams";
-import Notifications from "./pages/admin/notifications";
-import Writing from "./pages/admin/artists";
+
+import Sections from "./components/admin/sections";
+import Questions from "./components/admin/questions";
+import Options from "./components/admin/options";
+import DictionaryAdmin from "./components/admin/dictionary";
+import Decks from "./pages/admin/decks";
+import Cards from "./pages/admin/cards";
+import DashboardPage from "./pages/admin/dashboard";
 
 const router = createBrowserRouter([
   {
@@ -28,35 +33,54 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Dashboard />,
+        element: <DashboardPage />, // 👈 DASHBOARD
       },
-      {
-        path: "users",
-        element: <Users />,
-      },
-      {
-        path: "speaking",
-        element: <Speaking />,
-      },
-      {
-        path: "writing",
-        element: <Writing />,
-      },
-      {
-        path: "genres",
-        element: <Genres />,
-      },
-      {
-        path: "karaokes",
-        element: <Karaoke />,
-      },
+      // ✅ GIỮ NGUYÊN
+      { path: "users", element: <Users /> },
+      { path: "speaking", element: <Speaking /> },
+      { path: "writing", element: <Writing /> },
+      { path: "dictionary", element: <DictionaryAdmin /> },
+
+      // 🧠 EXAM TREE
       {
         path: "exams",
-        element: <Exams />,
+        children: [
+          { index: true, element: <Exams /> }, // /exams
+          {
+            path: ":examId/sections",
+            children: [
+              { index: true, element: <Sections /> }, // /exams/:examId/sections
+              {
+                path: ":sectionId/questions",
+                children: [
+                  {
+                    index: true,
+                    element: <Questions />,
+                  },
+                  {
+                    path: ":questionId/options",
+                    element: <Options />,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
+
+      // 📚 VOCABULARY
       {
-        path: "notifications",
-        element: <Notifications />,
+        path: "decks",
+        children: [
+          {
+            index: true,
+            element: <Decks />, // /decks
+          },
+          {
+            path: ":deckId/cards",
+            element: <Cards />,
+          },
+        ],
       },
     ],
   },

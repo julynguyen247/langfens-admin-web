@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { App, Divider, Form, Input, Modal, Select } from "antd";
 import type { FormProps } from "antd";
-import { updateWritingExam } from "@/services/api";
+import { updateSpeakingExam, updateWritingExam } from "@/services/api";
 
 interface IProps {
   openModalUpdate: boolean;
@@ -20,7 +20,7 @@ type FieldType = {
   tag: string;
 };
 
-const UpdateWriting = (props: IProps) => {
+const UpdateSpeaking = (props: IProps) => {
   const {
     openModalUpdate,
     setOpenModalUpdate,
@@ -29,11 +29,11 @@ const UpdateWriting = (props: IProps) => {
     dataUpdate,
   } = props;
 
-  const [isSubmit, setIsSubmit] = useState<boolean>(false);
-  const [form] = Form.useForm<FieldType>();
+  const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
+  const [form] = Form.useForm<FieldType>();
 
-  // fill dữ liệu khi chọn 1 writing exam
+  // Fill form khi chọn 1 speaking exam để edit
   useEffect(() => {
     if (dataUpdate) {
       form.setFieldsValue({
@@ -49,6 +49,7 @@ const UpdateWriting = (props: IProps) => {
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     const { id, title, taskText, examType, level, tag } = values;
+
     setIsSubmit(true);
     try {
       const res = await updateWritingExam(
@@ -67,12 +68,15 @@ const UpdateWriting = (props: IProps) => {
         setDataUpdate(null);
         refreshTable();
       } else {
-        throw new Error("Cập nhật thất bại");
+        notification.error({
+          message: "Cập nhật thất bại",
+          description: "Không nhận được phản hồi hợp lệ",
+        });
       }
-    } catch (error: any) {
+    } catch (err: any) {
       notification.error({
-        message: "Đã có lỗi xảy ra",
-        description: error.message,
+        message: "Cập nhật thất bại",
+        description: err?.message || "Lỗi trong quá trình gửi dữ liệu",
       });
     } finally {
       setIsSubmit(false);
@@ -115,9 +119,9 @@ const UpdateWriting = (props: IProps) => {
         </Form.Item>
 
         <Form.Item<FieldType>
-          label="Task / Đề bài (Markdown)"
+          label="Nội dung task"
           name="taskText"
-          rules={[{ required: true, message: "Vui lòng nhập đề bài" }]}
+          rules={[{ required: true, message: "Vui lòng nhập taskText" }]}
         >
           <Input.TextArea rows={4} />
         </Form.Item>
@@ -130,8 +134,9 @@ const UpdateWriting = (props: IProps) => {
           <Select
             placeholder="Chọn loại đề"
             options={[
-              { label: "Task 1", value: 1 },
-              { label: "Task 2", value: 2 },
+              { label: "Part 1", value: 1 },
+              { label: "Part 2", value: 2 },
+              { label: "Part 3", value: 3 },
             ]}
           />
         </Form.Item>
@@ -156,11 +161,11 @@ const UpdateWriting = (props: IProps) => {
           name="tag"
           rules={[{ required: true, message: "Vui lòng nhập tag" }]}
         >
-          <Input placeholder="Ví dụ: IELTS, TOEIC, Task 1, Essay, ..." />
+          <Input placeholder="Ví dụ: IELTS, TOEIC, Part 1, ..." />
         </Form.Item>
       </Form>
     </Modal>
   );
 };
 
-export default UpdateWriting;
+export default UpdateSpeaking;

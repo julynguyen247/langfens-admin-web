@@ -1,102 +1,91 @@
 import React, { useState } from "react";
 import type { FormProps } from "antd";
-import { App, Button, Checkbox, Form, Input } from "antd";
+import { App, Button, Form, Input } from "antd";
 import { useNavigate } from "react-router-dom";
-import { fetchAccountAPI, loginAPI } from "@/services/api";
+import { login, getMe } from "@/services/api";
 import { useCurrentApp } from "@/components/context/app.context";
+
 type FieldType = {
-  username: string;
+  email: string;
   password: string;
 };
 
 const LoginPage = () => {
   const [isSubmit, setIsSubmit] = useState(false);
-  const { message, notification } = App.useApp();
+  const { message } = App.useApp();
   const { setIsAuthenticated, setUser } = useCurrentApp();
+  const navigate = useNavigate();
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { username, password } = values;
+    const { email, password } = values;
     setIsSubmit(true);
-    const res = await loginAPI(username, password);
-    setIsSubmit(false);
 
-    if (res && res.accessToken) {
-      localStorage.setItem("access_token", res.accessToken);
+    try {
+      const res = await login(email, password);
 
-      try {
-        const account = await fetchAccountAPI();
-
-        if (!account.adminSecret) {
-          message.error("Tài khoản không có quyền quản trị!");
-          localStorage.removeItem("access_token");
-          return;
-        }
-
-        setIsAuthenticated(true);
-        setUser(account);
-        localStorage.setItem("user", JSON.stringify(account));
-        message.success("Đăng nhập thành công với quyền quản trị!");
-        navigate("/");
-      } catch (err) {
-        message.error("Không thể kiểm tra thông tin tài khoản!");
-        localStorage.removeItem("access_token");
+      const accessToken = res?.data?.data;
+      if (!accessToken) {
+        message.error("Sai email hoặc mật khẩu!");
+        return;
       }
-    } else {
-      message.error("Sai tài khoản hoặc mật khẩu!");
+
+      localStorage.setItem("access_token", accessToken);
+
+      // 2️⃣ Get me
+      const meRes = await getMe();
+      const account = meRes.data?.data; // ⚠️ lấy đúng data
+
+      if (!account) {
+        throw new Error("Không lấy được thông tin người dùng");
+      }
+
+      // 3️⃣ Check role ADMIN
+      const isAdmin = account.roles?.includes("ADMIN");
+
+      if (!isAdmin) {
+        message.error("Tài khoản không có quyền quản trị!");
+        localStorage.removeItem("access_token");
+        return;
+      }
+
+      // 4️⃣ Set global state
+      setIsAuthenticated(true);
+      setUser(account);
+      localStorage.setItem("user", JSON.stringify(account));
+
+      message.success("Đăng nhập admin thành công!");
+      navigate("/");
+    } catch (err) {
+      message.error("Đăng nhập thất bại!");
+      localStorage.removeItem("access_token");
+    } finally {
+      setIsSubmit(false);
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
-  ) => {
-    console.log("Failed:", errorInfo);
-  };
-  const navigate = useNavigate();
   return (
-    <div className="flex justify-center items-center flex-1 h-[100vh] w-[100vw]">
-      <div className="bg-gray-200 rounded-2xl p-12 w-[30vw]">
-        <Form
-          name="basic"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-          layout="vertical"
-          labelCol={{ span: 24 }}
-        >
+    <div className="flex justify-center items-center h-screen w-screen">
+      <div className="bg-gray-200 rounded-2xl p-12 w-[30vw] min-w-[360px]">
+        <Form layout="vertical" onFinish={onFinish} autoComplete="off">
           <Form.Item<FieldType>
-            labelCol={{
-              span: 24,
-            }}
-            wrapperCol={{ span: 24 }}
             label="Email"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
+            name="email"
+            rules={[{ required: true, message: "Vui lòng nhập email!" }]}
           >
             <Input />
           </Form.Item>
+
           <Form.Item<FieldType>
-            labelCol={{
-              span: 24,
-            }}
-            wrapperCol={{ span: 24 }}
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input.Password />
           </Form.Item>
-          <Form.Item
-            label={null}
-            wrapperCol={{ span: 24 }}
-            labelCol={{
-              span: 24,
-            }}
-          >
-            <Button type="primary" htmlType="submit" loading={isSubmit}>
-              Login
-            </Button>
-          </Form.Item>
+
+          <Button type="primary" htmlType="submit" loading={isSubmit} block>
+            Login
+          </Button>
         </Form>
       </div>
     </div>

@@ -311,8 +311,128 @@ export async function updateWritingExam(
   return res;
 }
 
-// DELETE writing exam
 export async function deleteWritingExam(id: string) {
   const res = await apisWriting.delete(`/admin/writing/delete/${id}`);
   return res;
+}
+
+export async function login(email: string, password: string) {
+  const res = await apisAuth.post("/auth/login", {
+    email,
+    password,
+  });
+  return res;
+}
+
+export async function refresh() {
+  const res = await apisAuth.post("/auth/refresh");
+  return res;
+}
+
+export async function getMe() {
+  const res = await apisAuth.get("/auth/me");
+  return res;
+}
+export async function importDictionary(path: string, maxLines: number) {
+  const res = await api.post("/dictionary/import", {
+    path,
+    maxLines,
+  });
+
+  return res;
+}
+export async function reindexDictionary(batchSize?: number) {
+  const res = await api.post("/dictionary/reindex", null, {
+    params: batchSize ? { batchSize } : {},
+  });
+
+  return res;
+}
+export async function getAllUsers() {
+  const res = await apisAuth.get("/auth/users");
+  return res;
+}
+export async function createDeck(payload: {
+  slug: string;
+  title: string;
+  descriptionMd: string;
+  category: string;
+  status: "draft" | "published";
+  userId: string;
+}) {
+  const res = await api.post("/users/deck", payload);
+  return res;
+}
+export async function updateDeck(
+  deckId: string,
+  payload: {
+    slug: string;
+    title: string;
+    descriptionMd: string;
+    category: string;
+    status: "draft" | "published";
+  }
+) {
+  const res = await api.put(`/users/deck/${deckId}`, payload);
+  return res;
+}
+export async function deleteDeck(deckId: string) {
+  const res = await api.delete(`/users/deck/${deckId}`);
+  return res;
+}
+
+export async function createDeckCard(
+  deckId: string,
+  payload: {
+    idx: number;
+    frontMd: string;
+    backMd: string;
+    hintMd?: string;
+  }
+) {
+  const res = await api.post(`/users/deck/${deckId}/card`, payload);
+  return res;
+}
+export async function updateDeckCard(
+  cardId: string,
+  payload: {
+    idx: number;
+    frontMd: string;
+    backMd: string;
+    hintMd?: string;
+  }
+) {
+  const res = await api.put(`/users/deck/card/${cardId}`, payload);
+  return res;
+}
+export async function deleteDeckCard(cardId: string) {
+  const res = await api.delete(`/users/deck/card/${cardId}`);
+  return res;
+}
+export async function getDeckCards(deckId: string) {
+  const res = await apisVocabulary.get(`/decks/deck:${deckId}/cards`);
+  return res;
+}
+export async function getSectionsByExam(examId: string) {
+  const res = await apisExam.get(`/admin/section/by-exam/${examId}`);
+  return res;
+}
+export async function getQuestionsBySection(sectionId: string) {
+  const res = await apisExam.get(`/admin/question/by-section/${sectionId}`);
+  return res;
+}
+export const getOptionsByQuestion = (questionId: string) =>
+  apisExam.get(`/admin/option/by-question/${questionId}`);
+
+export async function getDecks(params: {
+  page: number;
+  pageSize: number;
+  status?: string;
+  category?: string;
+}) {
+  const res = await apisVocabulary.get("/decks", {
+    params,
+  });
+
+  return res.data;
 }

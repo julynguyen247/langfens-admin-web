@@ -1,7 +1,7 @@
-import TableExams from "@/components/admin/exams/table.exams";
+import ExamListPage from "@/components/admin/exams/index.tsx";
 
 const Exams = () => {
-  return <TableExams />;
+  return <ExamListPage />;
 };
 
 export default Exams;

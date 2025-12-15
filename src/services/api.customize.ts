@@ -6,11 +6,11 @@ type ServiceKey =
   | "attempt"
   | "vocabulary"
   | "speaking"
-  | "writing";
+  | "writing"
+  | "chatbot"
+  | "dictionary";
 
 const GATEWAY_BASE = import.meta.env.VITE_GATEWAY_URL || "";
-
-// Build Gateway prefix
 const buildBase = (suffix: string) =>
   GATEWAY_BASE ? `${GATEWAY_BASE}${suffix}` : suffix;
 
@@ -21,9 +21,10 @@ const BASE_URL: Record<ServiceKey, string> = {
   vocabulary: buildBase("/api-vocabulary"),
   speaking: buildBase("/api-speaking"),
   writing: buildBase("/api-writing"),
+  chatbot: buildBase("/api-chatbot"),
+  dictionary: buildBase("/api-dictionary"),
 };
 
-// Token helpers
 const getToken = () =>
   typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
@@ -33,7 +34,6 @@ const setToken = (t: string | null) => {
   else localStorage.removeItem("access_token");
 };
 
-// Build axios instances
 const apis = Object.fromEntries(
   (Object.keys(BASE_URL) as (keyof typeof BASE_URL)[]).map((k) => {
     const api = axios.create({
@@ -52,7 +52,7 @@ const apis = Object.fromEntries(
       return config;
     });
 
-    // Auto-refresh token
+    // Auto refresh token
     api.interceptors.response.use(
       (res) => res,
       async (err: AxiosError) => {
@@ -63,19 +63,16 @@ const apis = Object.fromEntries(
         if (err.response?.status === 401 && original && !original._retry) {
           original._retry = true;
           try {
-            const r = await apisAuth.post("/auth/refresh", undefined, {
-              withCredentials: true,
-            });
-
-            const newToken = (r.data as any)?.accessToken ?? null;
-
-            if (newToken) {
-              setToken(newToken);
-              original.headers = original.headers ?? {};
-              (original.headers as any).Authorization = `Bearer ${newToken}`;
-            }
-
-            return api.request(original);
+            // const r = await apisAuth.post("/auth/refresh", undefined, {
+            //   withCredentials: true,
+            // });
+            // const newToken = (r.data as any)?.accessToken ?? null;
+            // if (newToken) {
+            //   setToken(newToken);
+            //   original.headers = original.headers ?? {};
+            //   (original.headers as any).Authorization = `Bearer ${newToken}`;
+            // }
+            // return api.request(original);
           } catch {
             setToken(null);
           }
@@ -89,12 +86,14 @@ const apis = Object.fromEntries(
   })
 ) as Record<ServiceKey, AxiosInstance>;
 
+// Exports
 export const apisAuth = apis.auth;
 export const apisExam = apis.exam;
 export const apisAttempt = apis.attempt;
 export const apisVocabulary = apis.vocabulary;
 export const apisSpeaking = apis.speaking;
 export const apisWriting = apis.writing;
-
+export const apisChatbot = apis.chatbot;
+export const apisDictionary = apis.dictionary;
 const api = apisAuth;
 export default api;

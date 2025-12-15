@@ -140,7 +140,7 @@ const TableSpeaking = () => {
         request={async () => {
           try {
             const res = await getSpeakingExams();
-            const list: SpeakingExam[] = res.data || [];
+            const list: SpeakingExam[] = res.data.data || [];
 
             const filtered = searchKeyword.trim()
               ? list.filter((item) =>
